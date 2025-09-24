@@ -1,0 +1,116 @@
+# ===========================================
+# Challenge QA - PHP/Docker Project
+# ===========================================
+
+# Composer Dependencies
+vendor/
+composer.phar
+# composer.lock - Keeping for consistent dependency versions
+
+# Environment & Configuration
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+config/local.php
+
+# Logs & Runtime Files
+logs/
+*.log
+error.log
+access.log
+app.log
+php_errors.log
+
+# Docker & Container Files
+docker-compose.override.yml
+.docker/
+docker/mysql/data/
+docker/logs/
+
+# Database Files
+*.sql.backup
+*.sql.dump
+*.db
+*.sqlite
+*.sqlite3
+data/
+mysql-data/
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-*
+*.code-workspace
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# PHP Specific
+.phpunit.result.cache
+phpunit.xml
+.php_cs.cache
+.php-cs-fixer.cache
+
+# Cache & Temporary Files
+cache/
+temp/
+tmp/
+*.tmp
+*.temp
+.cache/
+
+# Node.js (if frontend assets)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Security & Sensitive Files
+.secrets
+*.pem
+*.key
+*.crt
+*.p12
+jwt-keys/
+ssl/
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+clover.xml
+phpunit.xml.local
+
+# Build & Distribution
+build/
+dist/
+public/build/
+public/dist/
+
+# Documentation (generated)
+docs/api/
+docs/build/
+
+# Backup Files
+*.backup
+*.bak
+*.orig
+
+# Local Development
+local/
+.local/
+dev/
+development/

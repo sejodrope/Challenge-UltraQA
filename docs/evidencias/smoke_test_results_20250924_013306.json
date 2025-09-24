@@ -1,0 +1,19 @@
+﻿{
+    "Summary":  {
+                    "Passed":  0,
+                    "BugsFound":  1,
+                    "Timestamp":  "2025-09-24 01:33:55",
+                    "TotalTests":  12,
+                    "Failed":  12,
+                    "BaseUrl":  "http://localhost:8080"
+                },
+    "Bugs":  [
+                 {
+                     "Title":  "Missing Input Validation",
+                     "Description":  "Calculator accepts negative values without validation",
+                     "Id":  "BUG-008",
+                     "Severity":  "MEDIUM"
+                 }
+             ],
+    "EvidenceDirectory":  "docs/evidencias"
+}

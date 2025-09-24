@@ -1,0 +1,13 @@
+﻿{
+    "ActualStatus":  null,
+    "Error":  "Unable to connect to the remote server",
+    "Method":  "GET",
+    "TestId":  "ST001",
+    "Response":  "",
+    "ExpectedStatus":  200,
+    "Name":  "Health Check",
+    "TestType":  "FUNCTIONAL",
+    "Body":  "",
+    "Endpoint":  "/health",
+    "Timestamp":  "2025-09-24 01:33:10"
+}

@@ -1,0 +1,662 @@
+{
+  "info": {
+    "name": "Challenge QA API Tests",
+    "description": "Comprehensive test suite for Challenge QA API with bug detection focus",
+    "version": "1.0.0",
+    "_postman_id": "challenge-qa-collection"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "test_email",
+      "value": "qa.test.{{$timestamp}}@example.com",
+      "type": "string"
+    },
+    {
+      "key": "test_password",
+      "value": "senha123",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has correct content type', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test('Response has required fields', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData).to.have.property('timestamp');",
+              "    pm.expect(jsonData).to.have.property('version');",
+              "    pm.expect(jsonData.status).to.eql('ok');",
+              "});",
+              "",
+              "pm.test('Response time is less than 1000ms', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/health"
+      }
+    },
+    {
+      "name": "2. API Documentation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has API documentation', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('title');",
+              "    pm.expect(jsonData).to.have.property('endpoints');",
+              "    pm.expect(jsonData.endpoints).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/"
+      }
+    },
+    {
+      "name": "3. User Register - Valid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Response indicates success', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData).to.have.property('user_id');",
+              "    pm.collectionVariables.set('user_id', jsonData.user_id);",
+              "});",
+              "",
+              "pm.test('BUG CHECK: Password not exposed in response', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.not.have.property('password');",
+              "});",
+              "",
+              "pm.test('SECURITY: Warning about weak password (expected bug)', function () {",
+              "    const jsonData = pm.response.json();",
+              "    // This test documents the intentional bug - weak password accepted",
+              "    pm.expect(jsonData).to.have.property('warning');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/user/register"
+      }
+    },
+    {
+      "name": "4. User Register - Duplicate Email (BUG TEST)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code should be 409', function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test('BUG CHECK: Should detect existing email correctly', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "    pm.expect(jsonData.message).to.include('Email already exists');",
+              "});",
+              "",
+              "// KNOWN BUG: The logic checks email AND password instead of just email",
+              "pm.test('POTENTIAL BUG: Logic may allow duplicate with different password', function () {",
+              "    // This test may fail due to the bug in UserController.php line 25",
+              "    console.log('WARNING: Check if duplicate detection logic is correct');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/user/register"
+      }
+    },
+    {
+      "name": "5. User Register - Duplicate with Different Password (BUG EXPLOIT)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('BUG DETECTION: Should prevent duplicate email regardless of password', function () {",
+              "    if (pm.response.code === 201) {",
+              "        console.log('🐛 BUG CONFIRMED: Duplicate email allowed with different password!');",
+              "        pm.test('CRITICAL BUG: Duplicate email registered', function() {",
+              "            pm.expect.fail('CRITICAL: Email duplication allowed - UserController.php:25 bug confirmed');",
+              "        });",
+              "    } else if (pm.response.code === 409) {",
+              "        console.log('✅ CORRECT: Duplicate email properly rejected');",
+              "        pm.test('Email duplication correctly prevented', function() {",
+              "            pm.expect(pm.response.code).to.equal(409);",
+              "        });",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"different_password_123\"\n}"
+        },
+        "url": "{{base_url}}/api/user/register"
+      }
+    },
+    {
+      "name": "6. User Register - Invalid Email",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Should reject invalid email format', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Error message should be appropriate', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"invalid-email-format\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/user/register"
+      }
+    },
+    {
+      "name": "7. User Register - SQL Injection Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Should handle SQL injection attempt safely', function () {",
+              "    // Should either reject (400) or safely store as string data (201)",
+              "    pm.expect([400, 201]).to.include(pm.response.code);",
+              "});",
+              "",
+              "pm.test('Should not expose SQL errors', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const response = JSON.stringify(jsonData).toLowerCase();",
+              "    pm.expect(response).to.not.include('mysql');",
+              "    pm.expect(response).to.not.include('sql syntax');",
+              "    pm.expect(response).to.not.include('duplicate entry');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test'; DROP TABLE users;--@example.com\",\n  \"password\": \"' OR '1'='1\"\n}"
+        },
+        "url": "{{base_url}}/api/user/register"
+      }
+    },
+    {
+      "name": "8. User Login - Valid Credentials",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Login successful', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData).to.have.property('user');",
+              "});",
+              "",
+              "pm.test('SECURITY: Password not returned', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.user).to.not.have.property('password');",
+              "});",
+              "",
+              "pm.test('MISSING FEATURE: Should return token/session', function () {",
+              "    const jsonData = pm.response.json();",
+              "    // This will likely fail - documenting missing feature",
+              "    console.log('WARNING: No authentication token returned');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "url": "{{base_url}}/api/user/login"
+      }
+    },
+    {
+      "name": "9. User Login - User Not Found (User Enumeration Bug)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response_time_user_not_found = pm.response.responseTime;",
+              "pm.collectionVariables.set('time_user_not_found', response_time_user_not_found);",
+              "",
+              "pm.test('BUG CHECK: User enumeration vulnerability', function () {",
+              "    if (pm.response.code === 404) {",
+              "        console.log('🐛 USER ENUMERATION BUG: Returns 404 for non-existent user');",
+              "        pm.test('SECURITY BUG: User enumeration possible', function() {",
+              "            pm.expect.fail('SECURITY: 404 status reveals user existence - should be 401');",
+              "        });",
+              "    } else if (pm.response.code === 401) {",
+              "        console.log('✅ GOOD: Generic 401 error');",
+              "    }",
+              "});",
+              "",
+              "pm.test('Message should not reveal user existence', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const message = jsonData.message.toLowerCase();",
+              "    if (message.includes('not found') || message.includes('does not exist')) {",
+              "        console.log('🐛 USER ENUMERATION: Message reveals user existence');",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"anypassword\"\n}"
+        },
+        "url": "{{base_url}}/api/user/login"
+      }
+    },
+    {
+      "name": "10. User Login - Wrong Password (User Enumeration Bug)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let response_time_wrong_password = pm.response.responseTime;",
+              "let time_user_not_found = pm.collectionVariables.get('time_user_not_found');",
+              "",
+              "pm.test('BUG CHECK: Different responses for wrong password vs user not found', function () {",
+              "    if (pm.response.code === 401) {",
+              "        console.log('Status code: 401 (vs 404 for user not found)');",
+              "        const jsonData = pm.response.json();",
+              "        if (jsonData.message.toLowerCase().includes('incorrect') || ",
+              "            jsonData.message.toLowerCase().includes('wrong')) {",
+              "            console.log('🐛 USER ENUMERATION: Different message for wrong password');",
+              "        }",
+              "    }",
+              "});",
+              "",
+              "pm.test('TIMING ATTACK CHECK: Response times should be similar', function () {",
+              "    if (time_user_not_found) {",
+              "        let time_diff = Math.abs(response_time_wrong_password - time_user_not_found);",
+              "        console.log(`Time difference: ${time_diff}ms`);",
+              "        if (time_diff > 100) {",
+              "            console.log('⚠️ TIMING ATTACK: Significant time difference detected');",
+              "        }",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"wrong_password\"\n}"
+        },
+        "url": "{{base_url}}/api/user/login"
+      }
+    },
+    {
+      "name": "11. Simple Interest - Standard Calculation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Mathematical accuracy check', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const principal = 1000;",
+              "    const rate = 5;",
+              "    const time = 12;",
+              "    ",
+              "    // Formula: J = C * i * t / 100",
+              "    const expected_interest = (principal * rate * time) / 100;",
+              "    const expected_total = principal + expected_interest;",
+              "    ",
+              "    console.log(`Expected interest: ${expected_interest}, Got: ${jsonData.results.interest}`);",
+              "    console.log(`Expected total: ${expected_total}, Got: ${jsonData.results.total_amount}`);",
+              "    ",
+              "    pm.expect(jsonData.results.interest).to.be.closeTo(expected_interest, 0.01);",
+              "});",
+              "",
+              "pm.test('BUG CHECK: Rounding consistency', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const interest_decimals = (jsonData.results.interest.toString().split('.')[1] || '').length;",
+              "    const total_decimals = (jsonData.results.total_amount.toString().split('.')[1] || '').length;",
+              "    ",
+              "    console.log(`Interest decimals: ${interest_decimals}, Total decimals: ${total_decimals}`);",
+              "    ",
+              "    if (interest_decimals !== total_decimals) {",
+              "        console.log('🐛 ROUNDING BUG: Inconsistent decimal places');",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"principal\": 1000,\n  \"rate\": 5,\n  \"time\": 12\n}"
+        },
+        "url": "{{base_url}}/api/calculator/simple-interest"
+      }
+    },
+    {
+      "name": "12. Compound Interest - Time > 12 Bug Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('BUG DETECTION: Time > 12 divided by 2 incorrectly', function () {",
+              "    const jsonData = pm.response.json();",
+              "    ",
+              "    // With the bug, time=24 becomes time=12 in calculation",
+              "    // This would give wrong results",
+              "    console.log('Testing compound interest with time=24 (should trigger bug)');",
+              "    console.log('Input time: 24, but may be calculated as 12 due to bug');",
+              "    ",
+              "    // The bug is in CalculatorController.php line 66-68",
+              "    pm.expect(jsonData.inputs.time).to.equal(24);",
+              "    ",
+              "    // But the calculation might use time/2 = 12",
+              "    console.log(`Result: ${JSON.stringify(jsonData.results)}`);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"principal\": 1000,\n  \"rate\": 5,\n  \"time\": 24,\n  \"compounding_frequency\": 12\n}"
+        },
+        "url": "{{base_url}}/api/calculator/compound-interest"
+      }
+    },
+    {
+      "name": "13. Compound Interest - Time <= 12 (No Bug)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Time <= 12 should work correctly', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.inputs.time).to.equal(12);",
+              "    console.log('Time=12 should not trigger the division bug');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"principal\": 1000,\n  \"rate\": 5,\n  \"time\": 12,\n  \"compounding_frequency\": 12\n}"
+        },
+        "url": "{{base_url}}/api/calculator/compound-interest"
+      }
+    },
+    {
+      "name": "14. Installment - Rounding Consistency Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('BUG CHECK: Inconsistent rounding in installment calculation', function () {",
+              "    const jsonData = pm.response.json();",
+              "    ",
+              "    // Check different decimal places in results",
+              "    const installment_decimals = (jsonData.results.installment_amount.toString().split('.')[1] || '').length;",
+              "    const total_decimals = (jsonData.results.total_amount.toString().split('.')[1] || '').length;",
+              "    const interest_decimals = (jsonData.results.total_interest.toString().split('.')[1] || '').length;",
+              "    ",
+              "    console.log(`Installment decimals: ${installment_decimals}`);",
+              "    console.log(`Total decimals: ${total_decimals}`);",
+              "    console.log(`Interest decimals: ${interest_decimals}`);",
+              "    ",
+              "    if (installment_decimals !== total_decimals || total_decimals !== interest_decimals) {",
+              "        console.log('🐛 ROUNDING BUG: Inconsistent decimal places in installment calculation');",
+              "    }",
+              "});",
+              "",
+              "pm.test('Breakdown accuracy check', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const breakdown = jsonData.results.breakdown;",
+              "    ",
+              "    if (breakdown && breakdown.length > 0) {",
+              "        const last_balance = breakdown[breakdown.length - 1].remaining_balance;",
+              "        pm.expect(last_balance).to.be.closeTo(0, 0.01);",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"principal\": 10000,\n  \"rate\": 12,\n  \"installments\": 12\n}"
+        },
+        "url": "{{base_url}}/api/calculator/installment"
+      }
+    },
+    {
+      "name": "15. Security - Negative Values Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Should reject negative values', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Error message should be appropriate', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"principal\": -1000,\n  \"rate\": 5,\n  \"time\": 12\n}"
+        },
+        "url": "{{base_url}}/api/calculator/simple-interest"
+      }
+    }
+  ]
+}

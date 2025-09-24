@@ -1,0 +1,13 @@
+﻿{
+    "ActualStatus":  null,
+    "Error":  "Unable to connect to the remote server",
+    "Method":  "POST",
+    "TestId":  "ST010",
+    "Response":  "",
+    "ExpectedStatus":  200,
+    "Name":  "Simple Interest Calculation",
+    "TestType":  "FUNCTIONAL",
+    "Body":  "{\r\n    \"time\":  12,\r\n    \"principal\":  1000,\r\n    \"rate\":  5\r\n}",
+    "Endpoint":  "/api/calculator/simple-interest",
+    "Timestamp":  "2025-09-24 01:33:47"
+}

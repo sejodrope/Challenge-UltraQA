@@ -1,0 +1,13 @@
+﻿{
+    "ActualStatus":  null,
+    "Error":  "Unable to connect to the remote server",
+    "Method":  "POST",
+    "TestId":  "ST011",
+    "Response":  "",
+    "ExpectedStatus":  200,
+    "Name":  "Compound Interest Time\u003e12 (BUG TEST)",
+    "TestType":  "BUG_DETECTION",
+    "Body":  "{\r\n    \"time\":  24,\r\n    \"principal\":  1000,\r\n    \"rate\":  5,\r\n    \"compounding_frequency\":  12\r\n}",
+    "Endpoint":  "/api/calculator/compound-interest",
+    "Timestamp":  "2025-09-24 01:33:51"
+}

@@ -1,0 +1,13 @@
+﻿{
+    "ActualStatus":  null,
+    "Error":  "Unable to connect to the remote server",
+    "Method":  "POST",
+    "TestId":  "ST006",
+    "Response":  "",
+    "ExpectedStatus":  400,
+    "Name":  "Invalid Email Format",
+    "TestType":  "FUNCTIONAL",
+    "Body":  "{\r\n    \"password\":  \"smoketest123\",\r\n    \"email\":  \"invalid-email-format\"\r\n}",
+    "Endpoint":  "/api/user/register",
+    "Timestamp":  "2025-09-24 01:33:31"
+}

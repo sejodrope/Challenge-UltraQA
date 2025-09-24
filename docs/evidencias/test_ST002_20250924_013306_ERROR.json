@@ -1,0 +1,13 @@
+﻿{
+    "ActualStatus":  null,
+    "Error":  "Unable to connect to the remote server",
+    "Method":  "GET",
+    "TestId":  "ST002",
+    "Response":  "",
+    "ExpectedStatus":  200,
+    "Name":  "API Documentation",
+    "TestType":  "FUNCTIONAL",
+    "Body":  "",
+    "Endpoint":  "/",
+    "Timestamp":  "2025-09-24 01:33:14"
+}
