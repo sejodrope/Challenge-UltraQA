@@ -62,18 +62,18 @@ Validar a conformidade, segurança e confiabilidade das APIs de Cadastro, Login 
 
 **Total:** 110 casos de teste estruturados por funcionalidade
 
-| ID | Funcionalidade | Cenário | Entrada | Resultado Esperado | Resultado Obtido | Status |
-| --- | --- | --- | --- | --- | --- | --- |
-| **TC001** | Cadastro Usuário | Usuário válido | `{"email":"test@example.com","password":"senha123"}` | 201, user_id, senha hasheada | 🐛 Senha texto plano | ❌ **FAIL** |
-| **TC002** | Cadastro Usuário | Email duplicado | Mesmo email TC001 | 409, "Email already exists" | 🐛 Lógica quebrada | ❌ **FAIL** |
-| **TC012** | Cadastro Usuário | SQL Injection | `{"email":"test'; DROP TABLE users;--","password":"x"}` | 400, sem erro SQL | � Vulnerável | ❌ **FAIL** |
-| **TC021** | Login Usuário | Credenciais válidas | Usuário existente | 200, JWT token válido | 🐛 Token sem expiração | ❌ **FAIL** |
-| **TC022** | Login Usuário | Email inexistente | `{"email":"nao@existe.com","password":"x"}` | 401, "Invalid credentials" | 🐛 User enumeration | ❌ **FAIL** |
-| **TC041** | Juros Simples | Cálculo padrão | `{"principal":1000,"rate":5,"time":12}` | 200, juros = 50 | 🐛 Cálculo incorreto | ❌ **FAIL** |
-| **TC060** | Juros Compostos | Valores negativos | `{"principal":-1000,"rate":5,"time":12}` | 400, "Invalid values" | 🐛 Aceita negativos | ❌ **FAIL** |
-| **TC081** | Simulação Parcelas | Divisão por zero | `{"amount":1000,"installments":0}` | 400, "Invalid installments" | 🐛 Erro matemático | ❌ **FAIL** |
-| **SEC001** | Segurança | Rate limiting | 100 requests/minuto | 429, "Too many requests" | 🐛 Sem proteção | ❌ **FAIL** |
-| **SEC002** | Segurança | CORS headers | Request cross-origin | Headers seguros | � Headers expostos | ❌ **FAIL** |
+| ID | Funcionalidade | Cenário | Entrada | Resultado Esperado | Resultado Obtido |
+| --- | --- | --- | --- | --- | --- |
+| **TC001** | Cadastro Usuário | Usuário válido | `{"email":"test@example.com","password":"senha123"}` | 201, user_id, senha hasheada | 🐛 Senha texto plano |
+| **TC002** | Cadastro Usuário | Email duplicado | Mesmo email TC001 | 409, "Email already exists" | 🐛 Lógica quebrada |
+| **TC012** | Cadastro Usuário | SQL Injection | `{"email":"test'; DROP TABLE users;--","password":"x"}` | 400, sem erro SQL | � Vulnerável |
+| **TC021** | Login Usuário | Credenciais válidas | Usuário existente | 200, JWT token válido | 🐛 Token sem expiração |
+| **TC022** | Login Usuário | Email inexistente | `{"email":"nao@existe.com","password":"x"}` | 401, "Invalid credentials" | 🐛 User enumeration |
+| **TC041** | Juros Simples | Cálculo padrão | `{"principal":1000,"rate":5,"time":12}` | 200, juros = 50 | 🐛 Cálculo incorreto |
+| **TC060** | Juros Compostos | Valores negativos | `{"principal":-1000,"rate":5,"time":12}` | 400, "Invalid values" | 🐛 Aceita negativos |
+| **TC081** | Simulação Parcelas | Divisão por zero | `{"amount":1000,"installments":0}` | 400, "Invalid installments" | 🐛 Erro matemático |
+| **SEC001** | Segurança | Rate limiting | 100 requests/minuto | 429, "Too many requests" | 🐛 Sem proteção |
+| **SEC002** | Segurança | CORS headers | Request cross-origin | Headers seguros | � Headers expostos |
 
 **Distribuição por categoria:**
 
@@ -447,9 +447,7 @@ tests/
 
 **🛑 NÃO APROVAR para produção**
 
-**⏱️ TIMELINE:** 2 semanas para correções críticas
-
-**💰 INVESTIMENTO:** R$ 50K (emergencial)
+**⏱️ TIMELINE:** 2 semanas mais ou menos para correções críticas
 
 **📊 PRÓXIMO GATE:** Re-avaliação após correções + testes completos
 
