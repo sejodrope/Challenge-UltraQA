@@ -321,8 +321,6 @@ if ($user['password'] === $password) // Comparação direta
 
 ✅ **Compliance report** LGPD/OWASP
 
-**Este trabalho demonstra competências de QA Sênior/Lead aplicadas em um desafio de nível júnior, entregando valor empresarial através de metodologia profissional e automação completa.**
-
 - **LGPD:** Não conforme (dados expostos)
 - **PCI-DSS:** Não conforme (se aplicável)
 - **Multa Potencial:** R$ 50.000 - R$ 50.000.000
@@ -350,7 +348,6 @@ if ($user['password'] === $password) // Comparação direta
 
 ### **CENÁRIO "FIX CRÍTICOS" (Recomendado):**
 
-- **Investimento:** R$ 50.000 (48h trabalho)
 - **Risk Reduction:** 85%
 - **ROI:** 3000% - 16000%
 - **Timeline:** 2 semanas para produção
